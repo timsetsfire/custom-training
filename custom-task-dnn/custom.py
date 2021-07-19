@@ -58,10 +58,12 @@ def fit(X, y, output_dir, **kwargs):
 
 def score(data, model, **kwargs): 
     dgl_graphs = data["dgl_graph"].values
+    pos_class = kwargs["positive_class_label"]
+    neg_class = kwargs["negative_class_label"]
     dgl_graphs = list( map ( lambda x: pickle.loads(eval(x)), dgl_graphs))
     for g in dgl_graphs:
         g.ndata["attr"] = torch.ones(g.num_nodes(), 1)
     batched_graph = dgl.batch(dgl_graphs)
     feats = batched_graph.ndata['attr'].float()
     preds = F.softmax(model(batched_graph, feats), dim=1).detach().numpy()
-    return pd.DataFrame(preds, columns = ["neg_class", "pos_class"]).to_json(orient="records")
+    return pd.DataFrame(preds, columns = [neg_class, pos_class])
