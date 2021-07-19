@@ -2,6 +2,8 @@ import pandas as pd
 import dgl
 import torch
 from pathlib import Path
+import pickle
+import json
 
 def dict_to_dgl(graph):
     e = graph["edges"] 
@@ -30,7 +32,7 @@ def transform(data, transformer):
         parsed_data = df["graph"].map( lambda graph_as_string: json.loads(graph_as_string))
         dgl_graphs = map( lambda x: dict_to_dgl(x), parsed_data.values)
         dgl_graphs_bytes = map(lambda g: pickle.dumps(g), dgl_graphs)
-        df["dgl_graph"] = list(dgl_graphs_bytes)
+        data["dgl_graph"] = list(dgl_graphs_bytes)
     else:
         print("no column named graph found")
 
