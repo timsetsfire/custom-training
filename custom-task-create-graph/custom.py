@@ -1,7 +1,7 @@
 import pandas as pd
 import dgl
 import torch
-import Path
+from pathlib import Path
 
 def dict_to_dgl(graph):
     e = graph["edges"] 
