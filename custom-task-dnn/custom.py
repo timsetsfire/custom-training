@@ -8,9 +8,9 @@ def init(code_dir):
 
 def load_model(code_dir):
    # Returning a string with value "dummy" as the model.
-    model = GIN(2, 2, 1, 20, 2, 0, 0.01, "sum", "sum")
-    model.load_state_dict(torch.load(os.path.join(input_dir, "gin_model.h5")))
-    return model
+   model = GIN(2, 2, 1, 20, 2, 0, 0.01, "sum", "sum")
+   model.load_state_dict(torch.load(os.path.join(input_dir, "gin_model.h5")))
+   return model
 
 def fit(X, y, output_dir, **kwargs):
 
