@@ -29,7 +29,7 @@ def transform(data, transformer):
     columns = data.columns
     if "graph" in columns:
         print("graph column available")
-        parsed_data = df["graph"].map( lambda graph_as_string: json.loads(graph_as_string))
+        parsed_data = data["graph"].map( lambda graph_as_string: json.loads(graph_as_string))
         dgl_graphs = map( lambda x: dict_to_dgl(x), parsed_data.values)
         dgl_graphs_bytes = map(lambda g: pickle.dumps(g), dgl_graphs)
         data["dgl_graph"] = list(dgl_graphs_bytes)
