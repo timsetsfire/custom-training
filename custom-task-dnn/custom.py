@@ -2,30 +2,43 @@ import pandas as pd
 import pickle
 import dgl 
 import torch
-from gin import GIN
+from graph_isomorphism_network import *
 
-def init(code_dir):
+# def init(code_dir):
+
+def collate(samples):
+    graphs, labels = map(list, zip(*samples))
+    batched_graph = dgl.batch(graphs)
+    batched_labels = torch.tensor(labels)
+    return batched_graph, batched_labels
+    
+from torch.utils.data import DataLoader
 
 def load_model(code_dir):
-   # Returning a string with value "dummy" as the model.
-   model = GIN(2, 2, 1, 20, 2, 0, 0.01, "sum", "sum")
-   model.load_state_dict(torch.load(os.path.join(input_dir, "gin_model.h5")))
-   return model
+    model = GIN(2, 2, 1, 20, 2, 0, 0.01, "sum", "sum")
+    model.load_state_dict(torch.load(os.path.join(input_dir, "gin_model.h5")))
+    return model
 
 def fit(X, y, output_dir, **kwargs):
 
     model = GIN(2, 2, 1, 20, 2, 0, 0.01, "sum", "sum")
-    dgl_graphs = df2["dgl_graph"].values
-    dgl_graphs = list( map ( lambda x: pickle.loads(x), dgl_graphs))
-    batched_graph = dgl.batch(dgl_graphs)
-    batched_labels = torch.tensor(y.values)
+    dgl_graphs = X["dgl_graph"].values
+    dgl_graphs = list( map ( lambda x: pickle.loads(eval(x)), dgl_graphs))
+
+
+    for g, l in zip(dgl_graphs, y.values):
+      num_nodes = g.num_nodes()
+      g.ndata["attr"] = torch.ones(g.num_nodes(), 1)
+      g.ndata["label"] = torch.ones(num_nodes, 1) if l == 1 else torch.zeros(num_nodes, 1)
+
+    dataloader = DataLoader(dgl_graphs,batch_size=1024,collate_fn=collate,drop_last=False,shuffle=True)
 
     opt = torch.optim.Adam(model.parameters(),lr=0.01)
 
     for epoch in range(500):
-        for graphs, labels in zip(batched_graph, batched_labels):
-            feats = graphs.ndata['attr'].float()
-            logits = model(graphs, feats)
+        for batched_graph, labels in dataloader::
+            feats = batched_graph.ndata['attr'].float()
+            logits = model(batched_graph, feats)
             loss = F.cross_entropy(logits, label)
             # print(loss)
             opt.zero_grad()
@@ -37,6 +50,3 @@ def fit(X, y, output_dir, **kwargs):
     output_dir_path = Path(output_dir)
     if output_dir_path.exists() and output_dir_path.is_dir():
         torch.save(model.state_dict(), "{}/gin_model.h5".format(output_dir))
-
-def score(data, model):
-
