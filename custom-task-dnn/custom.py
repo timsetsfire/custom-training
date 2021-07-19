@@ -39,7 +39,7 @@ def fit(X, y, output_dir, **kwargs):
     opt = torch.optim.Adam(model.parameters(),lr=0.01)
 
     for epoch in range(500):
-        for batched_graph, labels in dataloader::
+        for batched_graph, labels in dataloader:
             feats = batched_graph.ndata['attr'].float()
             logits = model(batched_graph, feats)
             loss = F.cross_entropy(logits, label)
