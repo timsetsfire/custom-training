@@ -56,8 +56,8 @@ def fit(X, y, output_dir, **kwargs):
     if output_dir_path.exists() and output_dir_path.is_dir():
         torch.save(model.state_dict(), "{}/gin_model.h5".format(output_dir))
 
-def score(data, model): 
-    dgl_graphs = X["dgl_graph"].values
+def score(data, model, **kwargs): 
+    dgl_graphs = data["dgl_graph"].values
     dgl_graphs = list( map ( lambda x: pickle.loads(eval(x)), dgl_graphs))
     for g in dgl_graphs:
         g.ndata["attr"] = torch.ones(g.num_nodes(), 1)
